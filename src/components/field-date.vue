@@ -19,35 +19,52 @@ export default {
     }
   },
   computed: {
+  	isRange(){
+  		return this.options && this.options.type && this.options.type.endsWith('range');
+	},
     val: {
       get () {
-        return new Date(this.value)
+      	if(this.isRange){
+      		if(Array.isArray(this.value) && this.value.length===2){
+      			return this.value.map(v=> new Date(v));
+			}else{
+      			return []
+			}
+		}else{
+			return new Date(this.value)
+		}
       },
       set (value) {
         var time = ''
         if (value) {
-          let year = value.getFullYear()
-          let month = value.getMonth() + 1
-          let day = value.getDate()
-          let hour = value.getHours()
-          let minute = value.getMinutes()
-          let second = value.getSeconds()
-          let real = function (number) {
-            return number >= 10 ? number.toString() : '0' + number
-          }
-          time = [
-            year,
-            '-',
-            real(month),
-            '-',
-            real(day),
-            'T',
-            real(hour),
-            ':',
-            real(minute),
-            ':',
-            real(second)
-          ].join('')
+        	let tempValue = Array.isArray(value)?value:[value];
+			time = tempValue.map(v=>{
+				let year = v.getFullYear()
+				let month = v.getMonth() + 1
+				let day = v.getDate()
+				let hour = v.getHours()
+				let minute = v.getMinutes()
+				let second = v.getSeconds()
+				let real = function (number) {
+					return number >= 10 ? number.toString() : '0' + number
+				}
+				return [
+					year,
+					'-',
+					real(month),
+					'-',
+					real(day),
+					'T',
+					real(hour),
+					':',
+					real(minute),
+					':',
+					real(second)
+				].join('')
+			})
+			if(!this.isRange){
+        		time=time[0];
+			}
         }
         this.$emit('input', time)
       }
